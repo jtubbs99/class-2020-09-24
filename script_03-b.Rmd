@@ -50,9 +50,55 @@ sep_new <-
 
 a) Make a table using **gt** which shows the five courses with the biggest increase. Use the [How to make a table](https://davidkane9.github.io/PPBDS/tools.html#how-to-make-a-table) section of *The Primer*.
 
+```{r}
+total_enroll <- left_join(sep_new, sep_old, 
+                           by = c("id", "title", "name", "department"), 
+                          suffix = c("_new", "_old")) %>% 
+  mutate(change_enroll = (u_grad_new - u_grad_old))
+
+most_inc <- total_enroll %>% 
+  select(id, name, u_grad_new, change_enroll, u_grad_old) %>% 
+  arrange(desc(change_enroll)) %>% 
+  slice_head(n = 5)
+
+most_dec <- total_enroll %>% 
+  select(id, name, u_grad_new, change_enroll, u_grad_old) %>% 
+  arrange(change_enroll) %>% 
+  slice_head(n = 5)
+
+both_info <- full_join(most_inc, most_dec, 
+                       by = c("id", "name", "change_enroll", "u_grad_new", "u_grad_old"))
+```
+
+```{r}
+most_inc %>% 
+  gt() %>% 
+  tab_header(title = "Largest Changes in Undergrad Enrollment", 
+             subtitle = "5 Most Increased From 9/1 to 9/22")
+
+```
+
+
 b) Make a table using **gt** which shows the five courses with the biggest decrease.
 
+```{r}
+most_dec %>% 
+  gt() %>% 
+  tab_header(title = "Largest Changes in Undergrad Enrollment", 
+             subtitle = "5 Most Decreased From 9/1 to 9/22")
+
+```
+
+
 c) Make a nice looking graphic which shows these 10 courses.
+
+```{r}
+ggplot(both_info, aes(name, change_enroll)) +
+  geom_col() +
+  labs(title = "Largest Changes in Undergrad Enrollment", 
+       subtitle = "From 9/1 to 9/22")
+```
+
 
 d) Write down some thoughts about what might explain these increases and decreases. Or is it all just random? How would we know?
 
